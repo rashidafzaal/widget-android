@@ -1,44 +1,43 @@
-package com.rashidafzaal1718.WidgetAndroid
+package com.rashidafzaal1718.widgetandroid
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.widget.RemoteViews
+import com.rashidafzaal1718.WidgetAndroid.R
+import java.io.File
 
-/**
- * Implementation of App Widget functionality.
- */
 class CounterWidget : AppWidgetProvider() {
+
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
     }
 
-    override fun onEnabled(context: Context) {
-        // Enter relevant functionality for when the first widget is created
+    companion object {
+        fun updateAppWidget(
+            context: Context,
+            appWidgetManager: AppWidgetManager,
+            appWidgetId: Int
+        ) {
+            val count = readCount(context)
+            val views = RemoteViews(context.packageName, R.layout.counter_widget)
+            views.setTextViewText(R.id.counter_value, count.toString())
+            appWidgetManager.updateAppWidget(appWidgetId, views)
+        }
+
+        private fun readCount(context: Context): Int {
+            return try {
+                val file = File(context.filesDir, "count.txt")
+                if (file.exists()) file.readText().trim().toInt() else 0
+            } catch (e: Exception) {
+                0
+            }
+        }
     }
-
-    override fun onDisabled(context: Context) {
-        // Enter relevant functionality for when the last widget is disabled
-    }
-}
-
-internal fun updateAppWidget(
-    context: Context,
-    appWidgetManager: AppWidgetManager,
-    appWidgetId: Int
-) {
-    val widgetText = context.getString(R.string.appwidget_text)
-    // Construct the RemoteViews object
-    val views = RemoteViews(context.packageName, R.layout.counter_widget)
-    views.setTextViewText(R.id.appwidget_text, widgetText)
-
-    // Instruct the widget manager to update the widget
-    appWidgetManager.updateAppWidget(appWidgetId, views)
 }
